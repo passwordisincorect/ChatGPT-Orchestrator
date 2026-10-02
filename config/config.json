@@ -1,0 +1,12 @@
+{
+  "backend": "edge_tabs",
+  "max_active_workers": 3,
+  "database_path": "data/orchestrator.db",
+  "edge_executable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "chat_url": "https://chatgpt.com/",
+  "create_timeout_seconds": 20,
+  "send_timeout_seconds": 120,
+  "stable_seconds": 3,
+  "default_job_timeout_seconds": 120,
+  "default_max_retries": 0
+}

@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chatgpt-orchestrator"
+version = "0.4.0"
+description = "Persistent multi-worker, shared-tab and reviewer control plane for ChatGPT Web."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "mcp[cli]>=2,<3",
+    "psutil>=6,<8",
+    "pywin32>=306",
+    "pywinauto>=0.6.9,<0.7"
+]
+
+[project.scripts]
+chatgpt-orchestrator = "chatgpt_orchestrator.server:main"
+chatgpt-orchestrator-doctor = "chatgpt_orchestrator.doctor:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
