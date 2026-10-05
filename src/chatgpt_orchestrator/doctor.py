@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sys
 
+from . import __version__
 from .config import load_settings
 from .orchestrator import Orchestrator
 
@@ -11,7 +12,7 @@ def main() -> None:
     settings = load_settings()
     core = Orchestrator(settings=settings)
     print(json.dumps({
-        "version": "0.4.0",
+        "version": __version__,
         "python": sys.version.split()[0],
         "backend": settings.backend,
         "max_active_workers": settings.max_active_workers,

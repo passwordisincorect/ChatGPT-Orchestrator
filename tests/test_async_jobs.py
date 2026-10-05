@@ -6,7 +6,7 @@ import time
 import unittest
 from pathlib import Path
 
-from chatgpt_orchestrator.adapters import WorkerAdapter
+from chatgpt_orchestrator.adapters import NonRetryableWorkerError, WorkerAdapter
 from chatgpt_orchestrator.models import Settings
 from chatgpt_orchestrator.orchestrator import Orchestrator
 from chatgpt_orchestrator.store import Store
@@ -52,6 +52,25 @@ class FlakyAdapter(WorkerAdapter):
         if self.calls == 1:
             raise RuntimeError("first attempt fails")
         return f"recovered:{prompt}"
+
+    def close(self, session_id: str) -> None:
+        self.sessions.discard(session_id)
+
+
+class NonRetryableAdapter(WorkerAdapter):
+    def __init__(self):
+        self.sessions = set()
+        self.calls = 0
+
+    def create(self, role: str) -> str:
+        session = f"nonretry:{role}"
+        self.sessions.add(session)
+        return session
+
+    def send(self, session_id, prompt, *, cancel_event=None, timeout_seconds=None):
+        del session_id, prompt, cancel_event, timeout_seconds
+        self.calls += 1
+        raise NonRetryableWorkerError("submission state is ambiguous")
 
     def close(self, session_id: str) -> None:
         self.sessions.discard(session_id)
@@ -141,6 +160,21 @@ class AsyncJobTests(unittest.TestCase):
         self.assertEqual(terminal["status"], "COMPLETED")
         self.assertEqual(terminal["attempts"], 2)
         self.assertEqual(terminal["result"], "recovered:retry me")
+
+    def test_non_retryable_error_ignores_retry_budget(self):
+        adapter = NonRetryableAdapter()
+        core = self.make_core(adapter)
+        worker = core.chat_create("developer")
+        job = core.chat_submit(worker["id"], "do not replay", max_retries=3)
+
+        terminal = self.wait_terminal(core, job["id"])
+
+        self.assertEqual(terminal["status"], "ERROR")
+        self.assertEqual(terminal["attempts"], 1)
+        self.assertEqual(adapter.calls, 1)
+        self.assertIn("NON_RETRYABLE:", terminal["error"])
+        with self.assertRaisesRegex(RuntimeError, "non-retryable"):
+            core.chat_retry(job["id"])
 
     def test_one_active_job_per_worker(self):
         core = self.make_core(BlockingAdapter())

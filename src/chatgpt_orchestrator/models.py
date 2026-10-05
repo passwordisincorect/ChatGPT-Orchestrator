@@ -49,9 +49,17 @@ class Settings:
     max_active_workers: int
     database_path: str
     edge_executable: str = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+    cdp_profile_dir: str = "data/edge-cdp-profile"
     chat_url: str = "https://chatgpt.com/"
     create_timeout_seconds: float = 20.0
     send_timeout_seconds: float = 120.0
     stable_seconds: float = 3.0
     default_job_timeout_seconds: float = 120.0
     default_max_retries: int = 0
+    hybrid_cdp_enabled: bool = True
+    dom_broker_endpoint: str = "http://127.0.0.1:8765/api/dom"
+    dom_broker_token_file: str = r"D:\MCP-Test\.chatgpt-dom-broker-token"
+    dom_uia_fallback_enabled: bool = True
+    dom_tab_pool_only: bool = False
+    dom_tab_pool_size: int = 5
+    dom_idle_shutdown_seconds: float = 0.0

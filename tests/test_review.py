@@ -88,11 +88,30 @@ class ReviewTests(unittest.TestCase):
         self.assertTrue(final["reviewed"])
         self.assertEqual(final["result"], "FINAL_REVIEW")
         self.assertEqual(len(final["worker_results"]), 2)
+        self.assertEqual(core.store.active_worker_count(), 0)
+        self.assertEqual(core.chat_list(), [])
+        self.assertEqual(adapter.sessions, set())
 
         review_prompt = adapter.prompts[-1]
         self.assertIn("WORKER_RESULT:proposal A", review_prompt)
         self.assertIn("WORKER_RESULT:proposal B", review_prompt)
         self.assertIn("Choose a robust architecture", review_prompt)
+
+    def test_finalize_without_review_releases_workers(self):
+        core, adapter = self.make_core()
+        task = core.task_create("Finalize directly without review")
+        worker = core.chat_create("solver", task["id"])
+        job = core.chat_submit(worker["id"], "direct-finalize")
+        self.assertEqual(self.wait_terminal(core, job["id"])["status"], "COMPLETED")
+        self.assertEqual(core.store.active_worker_count(), 1)
+
+        final = core.task_finalize(task["id"])
+
+        self.assertTrue(final["ready"])
+        self.assertFalse(final["reviewed"])
+        self.assertEqual(core.store.active_worker_count(), 0)
+        self.assertEqual(core.chat_list(), [])
+        self.assertEqual(adapter.sessions, set())
 
     def test_review_requires_completed_worker_result(self):
         core, _adapter = self.make_core()

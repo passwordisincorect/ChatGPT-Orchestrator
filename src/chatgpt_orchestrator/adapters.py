@@ -5,6 +5,14 @@ from dataclasses import dataclass, field
 from uuid import uuid4
 
 
+class NonRetryableWorkerError(RuntimeError):
+    """A worker failure that must not be replayed automatically."""
+
+
+class AmbiguousSubmissionError(NonRetryableWorkerError):
+    """Submission may already have reached the remote service."""
+
+
 class WorkerAdapter:
     def create(self, role: str) -> str:
         raise NotImplementedError

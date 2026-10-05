@@ -5,3 +5,8 @@ __pycache__/
 data/
 dist/
 build/
+logs/
+deployment/*.dpapi
+.backup*/
+.patch_*.py
+*.bak-*

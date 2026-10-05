@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from mcp.server.mcpserver import MCPServer
 
+from . import __version__
 from .orchestrator import Orchestrator
 
 mcp = MCPServer(
     name="ChatGPT-Orchestrator",
-    version="0.4.0",
-    description="Persistent multi-worker and review control plane for ChatGPT Web.",
+    version=__version__,
+    description="Autonomous multi-worker, persistent-project-state, review/rework and recovery control plane for ChatGPT MAIN. Prefer for complex work needing independent workers, durable project context, review, rework, or recovery; use ChatGPT-Actuator for simple local machine actions and short deterministic workflows.",
 )
 _core: Orchestrator | None = None
 
@@ -20,9 +21,155 @@ def core() -> Orchestrator:
 
 
 @mcp.tool()
-def task_create(goal: str) -> dict:
-    """Create one persistent top-level task."""
-    return core().task_create(goal)
+def orchestrator_info() -> dict:
+    """Return version, backend, capacity and backend readiness information."""
+    return core().orchestrator_info()
+
+
+@mcp.tool()
+def project_create(
+    name: str,
+    summary: str = "",
+    goals: list[str] | None = None,
+    decisions: list[str] | None = None,
+    current_phase: str = "",
+    status: str = "active",
+    next_actions: list[str] | None = None,
+) -> dict:
+    """Create persistent project state without changing task/browser behavior."""
+    return core().project_create(
+        name,
+        summary=summary,
+        goals=goals,
+        decisions=decisions,
+        current_phase=current_phase,
+        status=status,
+        next_actions=next_actions,
+    )
+
+
+@mcp.tool()
+def project_list(
+    status: str | None = None,
+    limit: int = 50,
+) -> list[dict]:
+    """List persistent projects using a compact summary projection."""
+    return core().project_list(status=status, limit=limit)
+
+
+@mcp.tool()
+def project_get(
+    project_id: str,
+    recent_events: int = 10,
+) -> dict:
+    """Read project state, related tasks, and recent project/task events."""
+    return core().project_get(project_id, recent_events=recent_events)
+
+
+@mcp.tool()
+def project_update(
+    project_id: str,
+    expected_version: int,
+    name: str | None = None,
+    summary: str | None = None,
+    goals: list[str] | None = None,
+    decisions: list[str] | None = None,
+    current_phase: str | None = None,
+    status: str | None = None,
+    next_actions: list[str] | None = None,
+) -> dict:
+    """Patch human-authored project state using optimistic concurrency."""
+    return core().project_update(
+        project_id,
+        expected_version,
+        name=name,
+        summary=summary,
+        goals=goals,
+        decisions=decisions,
+        current_phase=current_phase,
+        status=status,
+        next_actions=next_actions,
+    )
+
+
+@mcp.tool()
+def project_attach_task(project_id: str, task_id: str) -> dict:
+    """Attach an existing task to a project and snapshot terminal outcomes."""
+    return core().project_attach_task(project_id, task_id)
+
+
+@mcp.tool()
+def task_create(goal: str, project_id: str | None = None) -> dict:
+    """Create one persistent top-level task, optionally linked to a project."""
+    return core().task_create(goal, project_id=project_id)
+
+
+@mcp.tool()
+def task_plan(
+    goal: str,
+    worker_count: int | None = None,
+    review: bool = True,
+    project_id: str | None = None,
+) -> dict:
+    """Plan complementary worker roles for a complex goal without launching workers. Use this for work that benefits from independent perspectives or review; prefer ChatGPT-Actuator for simple local actions. Optionally include persistent project context."""
+    return core().task_plan(
+        goal,
+        worker_count=worker_count,
+        review=review,
+        project_id=project_id,
+    )
+
+
+@mcp.tool()
+def task_auto_start(
+    goal: str,
+    worker_count: int | None = None,
+    review: bool = True,
+    timeout_seconds: float | None = None,
+    max_retries: int | None = None,
+    project_id: str | None = None,
+) -> dict:
+    """Create and launch a complex autonomous task. MAIN should prefer this when the goal needs independent workers, parallel analysis, review/rework, or recovery; prefer ChatGPT-Actuator for simple local actions. Optionally link the task to persistent project state."""
+    return core().task_auto_start(
+        goal,
+        worker_count=worker_count,
+        review=review,
+        timeout_seconds=timeout_seconds,
+        max_retries=max_retries,
+        project_id=project_id,
+    )
+
+
+@mcp.tool()
+def task_auto_advance(
+    task_id: str,
+    review: bool = True,
+    review_instructions: str | None = None,
+    max_rework_rounds: int = 1,
+    timeout_seconds: float | None = None,
+) -> dict:
+    """Advance an autonomous task through review, rework, re-review, and finalization."""
+    return core().task_auto_advance(
+        task_id,
+        review=review,
+        review_instructions=review_instructions,
+        max_rework_rounds=max_rework_rounds,
+        timeout_seconds=timeout_seconds,
+    )
+
+
+@mcp.tool()
+def task_recover(
+    task_id: str,
+    restart_only: bool = True,
+    timeout_seconds: float | None = None,
+) -> dict:
+    """Resubmit jobs interrupted by a previous Orchestrator restart."""
+    return core().task_recover(
+        task_id,
+        restart_only=restart_only,
+        timeout_seconds=timeout_seconds,
+    )
 
 
 @mcp.tool()

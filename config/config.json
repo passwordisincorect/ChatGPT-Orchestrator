@@ -1,5 +1,5 @@
 {
-  "backend": "edge_tabs",
+  "backend": "dom_hybrid",
   "max_active_workers": 3,
   "database_path": "data/orchestrator.db",
   "edge_executable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
@@ -8,5 +8,13 @@
   "send_timeout_seconds": 120,
   "stable_seconds": 3,
   "default_job_timeout_seconds": 120,
-  "default_max_retries": 0
+  "default_max_retries": 0,
+  "hybrid_cdp_enabled": false,
+  "cdp_profile_dir": "data/edge-cdp-profile",
+  "dom_broker_endpoint": "http://127.0.0.1:8765/api/dom",
+  "dom_broker_token_file": "D:\\MCP-Test\\.chatgpt-dom-broker-token",
+  "dom_uia_fallback_enabled": false,
+  "dom_tab_pool_only": true,
+  "dom_tab_pool_size": 5,
+  "dom_idle_shutdown_seconds": 30
 }

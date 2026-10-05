@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chatgpt-orchestrator"
-version = "0.4.0"
-description = "Persistent multi-worker, shared-tab and reviewer control plane for ChatGPT Web."
+version = "0.8.0"
+description = "Autonomous multi-worker control plane for ChatGPT Web with persistent project state, review/rework, recovery, and hybrid browser transport."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -14,7 +14,8 @@ dependencies = [
     "mcp[cli]>=2,<3",
     "psutil>=6,<8",
     "pywin32>=306",
-    "pywinauto>=0.6.9,<0.7"
+    "pywinauto>=0.6.9,<0.7",
+    "websocket-client>=1.8,<2"
 ]
 
 [project.scripts]
