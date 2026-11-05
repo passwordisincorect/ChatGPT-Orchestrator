@@ -78,7 +78,7 @@ Use `project_update(project_id, expected_version, ...)` for explicit state chang
 
 ## v0.6 highlights
 
-- New default backend: `edge_hybrid`.
+- v0.6 introduced the `edge_hybrid` browser backend. The current checked-in `config/config.json` selects `dom_hybrid` instead.
 - CDP is attempted first for background browser execution.
 - CDP workers are accepted only after a readiness preflight confirms a usable, authenticated ChatGPT composer with no detected browser-verification challenge.
 - If CDP is unavailable, signed out, challenged, or not ready **before prompt submission**, the worker falls back automatically to the proven `edge_tabs` UIA-only transport.
@@ -236,7 +236,7 @@ The manual v0.4-style workflow remains supported when MAIN needs exact worker co
 
 ## Browser backends
 
-### `edge_hybrid` — current default
+### `edge_hybrid` — v0.6 browser backend (optional)
 
 v0.6 combines the two existing browser transports behind one worker adapter:
 
@@ -255,7 +255,7 @@ worker
 
 The hybrid backend keeps one stable transport binding per worker session. If a CDP session loses readiness before a prompt is submitted, it can migrate once to a fresh UIA worker slot. If a CDP send has already begun, failures are returned as non-retryable ambiguous-submission errors so neither the hybrid adapter nor the Orchestrator retry loop can replay the prompt automatically.
 
-Runtime configuration:
+Optional `edge_hybrid` configuration (not the checked-in default):
 
 ```json
 {
@@ -263,6 +263,8 @@ Runtime configuration:
   "hybrid_cdp_enabled": true
 }
 ```
+
+**Current repository defaults:** `config/config.json` uses `"backend": "dom_hybrid"` with `"hybrid_cdp_enabled": false`. The `edge_hybrid` diagram above documents the older transport and is not the active default in the tracked configuration.
 
 Set `hybrid_cdp_enabled` to `false` to force the stable UIA-only path.
 
