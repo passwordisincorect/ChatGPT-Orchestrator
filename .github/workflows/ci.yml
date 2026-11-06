@@ -41,7 +41,7 @@ jobs:
 
           async def main():
               tools = await mcp.list_tools()
-              assert len(tools) == 19, len(tools)
+              assert len(tools) == 29, len(tools)
 
           asyncio.run(main())
           '@ | python -
